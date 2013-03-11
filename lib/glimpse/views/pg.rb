@@ -35,7 +35,12 @@ module Glimpse
       end
 
       def formatted_duration
-        "%.2fms" % (duration * 1000)
+        ms = duration * 1000
+        if ms >= 1000
+          "%.2fms" % ms
+        else
+          "%.0fms" % ms
+        end
       end
 
       def calls
