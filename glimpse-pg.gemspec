@@ -19,4 +19,5 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'glimpse'
   gem.add_dependency 'pg'
+  gem.add_dependency 'atomic', '>= 1.0.0'
 end
