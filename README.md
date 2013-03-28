@@ -1,6 +1,6 @@
 # Peek::PG
 
-Provide a peek into the Postgres queries made during your application's requests.
+Take a peek into the Postgres queries made during your application's requests.
 
 Things this peek view provides:
 
