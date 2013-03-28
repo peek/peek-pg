@@ -1,4 +1,4 @@
-module Glimpse
+module Peek
   module PG
     class Railtie < ::Rails::Engine
     end

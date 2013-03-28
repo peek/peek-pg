@@ -1,8 +1,8 @@
-# Glimpse::PG
+# Peek::PG
 
-Provide a glimpse into the Postgres queries made during your application's requests.
+Provide a peek into the Postgres queries made during your application's requests.
 
-Things this glimpse view provides:
+Things this peek view provides:
 
 - Total number of Postgres queries called during the request
 - The duration of the queries made during the request
@@ -11,7 +11,7 @@ Things this glimpse view provides:
 
 Add this line to your application's Gemfile:
 
-    gem 'glimpse-pg'
+    gem 'peek-pg'
 
 And then execute:
 
@@ -19,14 +19,14 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install glimpse-pg
+    $ gem install peek-pg
 
 ## Usage
 
-Add the following to your `config/initializers/glimpse.rb`: 
+Add the following to your `config/initializers/peek.rb`: 
 
 ```ruby
-Glimpse.into Glimpse::Views::PG
+Peek.into Peek::Views::PG
 ```
 
 ## Contributing

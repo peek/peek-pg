@@ -30,7 +30,7 @@ class PG::Connection
   alias_method_chain :async_exec, :timing
 end
 
-module Glimpse
+module Peek
   module Views
     class PG < View
       def duration
