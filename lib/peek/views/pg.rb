@@ -28,6 +28,16 @@ class PG::Connection
     PG::Connection.query_count.update { |value| value + 1 }
   end
   alias_method_chain :async_exec, :timing
+
+  def exec_prepared_with_timing(*args)
+    start = Time.now
+    exec_prepared_without_timing(*args)
+  ensure
+    duration = (Time.now - start)
+    PG::Connection.query_time.update { |value| value + duration }
+    PG::Connection.query_count.update { |value| value + 1 }
+  end
+  alias_method_chain :exec_prepared, :timing
 end
 
 module Peek
