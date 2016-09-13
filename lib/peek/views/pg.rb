@@ -2,45 +2,43 @@ require 'pg'
 require 'concurrent/atomics'
 
 # Instrument SQL time
-class PG::Connection
-  class << self
-    attr_accessor :query_time, :query_count
-  end
-  self.query_count = Concurrent::AtomicReference.new(0)
-  self.query_time = Concurrent::AtomicReference.new(0)
-
-  def exec_with_timing(*args)
-    start = Time.now
-    exec_without_timing(*args)
-  ensure
-    duration = (Time.now - start)
-    PG::Connection.query_time.update { |value| value + duration }
-    PG::Connection.query_count.update { |value| value + 1 }
-  end
-  alias_method_chain :exec, :timing
-
-  def async_exec_with_timing(*args)
-    start = Time.now
-    async_exec_without_timing(*args)
-  ensure
-    duration = (Time.now - start)
-    PG::Connection.query_time.update { |value| value + duration }
-    PG::Connection.query_count.update { |value| value + 1 }
-  end
-  alias_method_chain :async_exec, :timing
-
-  def exec_prepared_with_timing(*args)
-    start = Time.now
-    exec_prepared_without_timing(*args)
-  ensure
-    duration = (Time.now - start)
-    PG::Connection.query_time.update { |value| value + duration }
-    PG::Connection.query_count.update { |value| value + 1 }
-  end
-  alias_method_chain :exec_prepared, :timing
-end
-
 module Peek
+  # This module is `prepended` to PG::Connection
+  module PGConnectionInstrumentation
+    def self.prepended(klass)
+      klass.singleton_class.send(:attr_accessor, :query_time, :query_count)
+      klass.query_count = Concurrent::AtomicReference.new(0)
+      klass.query_time = Concurrent::AtomicReference.new(0)
+    end
+
+    def exec(*args)
+      start = Time.now
+      super
+    ensure
+      duration = (Time.now - start)
+      self.class.query_time.update { |value| value + duration }
+      self.class.query_count.update { |value| value + 1 }
+    end
+
+    def async_exec(*args)
+      start = Time.now
+      super
+    ensure
+      duration = (Time.now - start)
+      self.class.query_time.update { |value| value + duration }
+      self.class.query_count.update { |value| value + 1 }
+    end
+
+    def exec_prepared(*args)
+      start = Time.now
+      super
+    ensure
+      duration = (Time.now - start)
+      self.class.query_time.update { |value| value + duration }
+      self.class.query_count.update { |value| value + 1 }
+    end
+  end
+
   module Views
     class PG < View
       def duration
@@ -76,3 +74,5 @@ module Peek
     end
   end
 end
+
+PG::Connection.prepend(Peek::PGConnectionInstrumentation)
