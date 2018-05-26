@@ -1,45 +1,44 @@
 require 'pg'
 require 'concurrent/atomics'
 
-module Peek
-  module PGInstrumented
-    def exec(*args)
-      start = Time.now
-      super(*args)
-    ensure
-      duration = (Time.now - start)
-      ::PG::Connection.query_time.update { |value| value + duration }
-      ::PG::Connection.query_count.update { |value| value + 1 }
-    end
-
-    def async_exec(*args)
-      start = Time.now
-      super(*args)
-    ensure
-      duration = (Time.now - start)
-      ::PG::Connection.query_time.update { |value| value + duration }
-      ::PG::Connection.query_count.update { |value| value + 1 }
-    end
-
-    def exec_prepared(*args)
-      start = Time.now
-      super(*args)
-    ensure
-      duration = (Time.now - start)
-      ::PG::Connection.query_time.update { |value| value + duration }
-      ::PG::Connection.query_count.update { |value| value + 1 }
-    end
-  end
-end
-
 # Instrument SQL time
 class PG::Connection
-  prepend ::Peek::PGInstrumented
   class << self
     attr_accessor :query_time, :query_count
   end
   self.query_count = Concurrent::AtomicReference.new(0)
   self.query_time = Concurrent::AtomicReference.new(0)
+
+  alias_method :exec_without_peek, :exec
+  alias_method :async_exec_without_peek, :async_exec
+  alias_method :exec_prepared_without_peek, :exec_prepared
+
+  def exec(*args, &blk)
+    start = Time.now
+    exec_without_peek(*args, &blk)
+  ensure
+    duration = (Time.now - start)
+    ::PG::Connection.query_time.update { |value| value + duration }
+    ::PG::Connection.query_count.update { |value| value + 1 }
+  end
+
+  def async_exec(*args, &blk)
+    start = Time.now
+    async_exec_without_peek(*args, &blk)
+  ensure
+    duration = (Time.now - start)
+    ::PG::Connection.query_time.update { |value| value + duration }
+    ::PG::Connection.query_count.update { |value| value + 1 }
+  end
+
+  def exec_prepared(*args,&blk)
+    start = Time.now
+    exec_prepared_without_peek(*args, &blk)
+  ensure
+    duration = (Time.now - start)
+    ::PG::Connection.query_time.update { |value| value + duration }
+    ::PG::Connection.query_count.update { |value| value + 1 }
+  end
 end
 
 module Peek
