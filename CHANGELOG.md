@@ -14,3 +14,7 @@
 # 1.3.0
 
 - Use prepend to instrument Postgres queries `alias_method_chain` - [#8](https://github.com/peek/peek-pg/pull/5) [@8398a7](https://github.com/8398a7)
+
+# Next
+
+- Instrument `exec_params` to support Rails 5.1.
