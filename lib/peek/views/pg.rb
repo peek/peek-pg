@@ -29,6 +29,15 @@ module Peek
       ::PG::Connection.query_time.update { |value| value + duration }
       ::PG::Connection.query_count.update { |value| value + 1 }
     end
+
+    def exec_params(*args)
+      start = Time.now
+      super(*args)
+    ensure
+      duration = (Time.now - start)
+      ::PG::Connection.query_time.update { |value| value + duration }
+      ::PG::Connection.query_count.update { |value| value + 1 }
+    end
   end
 end
 
